@@ -1,31 +1,26 @@
 import { defineStore } from 'pinia';
 
-import { LoginUser } from '@/api/model/userLogin';
+import { LoginUser } from '@/api/model/loginUser';
 import { Login } from '@/api/userLogin';
 import { TOKEN_NAME } from '@/config/global';
 import { store, usePermissionStore } from '@/store';
 
-const InitUserInfo = {
-  roles: [], // 前端权限模型使用 如果使用请配置modules/permission-fe.ts使用
-};
-
 export const useUserStore = defineStore('user', {
   state: () => ({
-    token: localStorage.getItem(TOKEN_NAME) || 'main_token', // 默认token不走权限
-    userInfo: { ...InitUserInfo },
+    token: localStorage.getItem(TOKEN_NAME), // 默认token不走权限
   }),
-  getters: {
-    roles: (state) => {
-      return state.userInfo?.roles;
-    },
-  },
+  getters: {},
   actions: {
     async login(user: LoginUser) {
       // 登录请求流程
       console.log(`用户信息:`, user);
       try {
         const token = await Login(user);
-        if (token !== '用户名或者密码不正确！') this.token = token;
+        if (token !== '用户名或者密码不正确！') {
+          this.token = token;
+          localStorage.setItem(TOKEN_NAME, token);
+          console.log(localStorage.getItem(TOKEN_NAME));
+        }
       } catch (e) {
         console.log(e);
       }
@@ -50,7 +45,6 @@ export const useUserStore = defineStore('user', {
     async logout() {
       localStorage.removeItem(TOKEN_NAME);
       this.token = '';
-      this.userInfo = { ...InitUserInfo };
     },
     async removeToken() {
       this.token = '';

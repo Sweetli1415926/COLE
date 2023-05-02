@@ -1,8 +1,6 @@
 import type { LoginUser } from '@/api/model/loginUser';
 import { request } from '@/utils/request';
 
-import { managerModel } from './model/managerModel';
-
 const Api = {
   userlogin: '/Login/Login',
   test: '/Login/Test',
@@ -18,10 +16,5 @@ export function Login(user: LoginUser) {
 export function Test() {
   return request.get({
     url: Api.test,
-  });
-}
-export function GetMangerInfo() {
-  return request.get<managerModel>({
-    url: Api.ManagerInfo,
   });
 }

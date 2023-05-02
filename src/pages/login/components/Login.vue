@@ -7,7 +7,6 @@
     label-width="0"
     @submit="onSubmit"
   >
-    <button @click="testaxios()">test</button>
     <template v-if="type == 'password'">
       <t-form-item name="username">
         <t-input v-model="formData.username" size="large" placeholder="请输入账号：admin">
@@ -86,14 +85,10 @@ import { MessagePlugin } from 'tdesign-vue-next';
 import { ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
-import { LoginUser } from '@/api/model/userLogin';
-import { Test } from '@/api/userLogin';
+import { LoginUser } from '@/api/model/loginUser';
 import { useCounter } from '@/hooks';
 import { useUserStore } from '@/store';
 
-const testaxios = () => {
-  Test();
-};
 const userStore = useUserStore();
 
 const LoginInfo: LoginUser = {

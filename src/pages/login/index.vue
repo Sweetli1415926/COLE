@@ -5,7 +5,7 @@
     <div class="login-container">
       <div class="title-container">
         <h1 class="title margin-no">登录到</h1>
-        <h1 class="title">南京大学终身学院OA管理系统</h1>
+        <h1 class="title">XX大学终身学院OA管理系统</h1>
       </div>
 
       <login v-if="type === 'login'" />
@@ -13,7 +13,7 @@
       <tdesign-setting />
     </div>
 
-    <footer class="copyright">南京大学终身学院OA管理系统</footer>
+    <footer class="copyright">XX大学终身学院OA管理系统</footer>
   </div>
 </template>
 <script lang="ts">

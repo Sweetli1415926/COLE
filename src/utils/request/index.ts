@@ -41,7 +41,8 @@ const transform: AxiosTransform = {
     if (!data) {
       throw new Error('请求接口错误');
     }
-    return data.token;
+    return data;
+    // return data.token;
     // //  这里 code为 后台统一的字段，需要在 types.ts内修改为项目自己的接口返回格式
     // const { code } = data;
 

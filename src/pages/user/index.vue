@@ -3,8 +3,8 @@
     <t-col :flex="3">
       <div class="user-left-greeting">
         <div>
-          Hi，Image
-          <span class="regular"> 下午好，今天是你加入鹅厂的第 100 天～</span>
+          Hi，{{ manageInfo.name }}
+          <span class="regular"> 下午好，今天是你加终生教育学院的第705天～</span>
         </div>
         <img src="@/assets/assets-tencent-logo.png" class="logo" />
       </div>
@@ -16,28 +16,44 @@
           </t-button>
         </template>
         <t-row class="content" justify="space-between">
-          <t-col v-for="(item, index) in USER_INFO_LIST" :key="index" class="contract" :span="item.span || 3">
-            <div class="contract-title">
-              {{ item.title }}
-            </div>
-            <div class="contract-detail">
-              {{ item.content }}
-            </div>
+          <t-col class="contract" :span="4">
+            <div class="contract-title">工资号</div>
+            <div class="contract-detail">{{ manageInfo.workCode }}</div>
+          </t-col>
+          <t-col class="contract" :span="4">
+            <div class="contract-title">手机</div>
+            <div class="contract-detail">{{ manageInfo.phoneNumber }}</div>
+          </t-col>
+          <t-col class="contract" :span="4">
+            <div class="contract-title">座机</div>
+            <div class="contract-detail">{{ manageInfo.telNumber }}</div>
+          </t-col>
+          <t-col class="contract" :span="4">
+            <div class="contract-title">邮箱</div>
+            <div class="contract-detail">{{ manageInfo.email }}</div>
+          </t-col>
+          <t-col class="contract" :span="4">
+            <div class="contract-title">所属部门</div>
+            <div class="contract-detail">{{ manageInfo.department }}</div>
+          </t-col>
+          <t-col class="contract" :span="4">
+            <div class="contract-title">办公室</div>
+            <div class="contract-detail">{{ manageInfo.office }}</div>
           </t-col>
         </t-row>
       </t-card>
 
       <t-card class="content-container" :bordered="false">
         <t-tabs value="second">
-          <t-tab-panel value="first" label="内容列表">
+          <t-tab-panel value="first" label="意向课程列表">
             <p>内容列表</p>
           </t-tab-panel>
-          <t-tab-panel value="second" label="内容列表">
+          <t-tab-panel value="second" label="即将上课列表">
             <t-card :bordered="false" class="card-padding-no" title="主页访问数据" describe="（次）">
               <template #actions>
                 <t-date-range-picker
                   class="card-date-picker-container"
-                  :default-value="LAST_7_DAYS"
+                  :default-value="LAST_30_DAYS"
                   theme="primary"
                   mode="date"
                   @change="onLineChange"
@@ -46,7 +62,10 @@
               <div id="lineContainer" style="width: 100%; height: 328px" />
             </t-card>
           </t-tab-panel>
-          <t-tab-panel value="third" label="内容列表">
+          <t-tab-panel value="third" label="正在上课列表">
+            <p>内容列表</p>
+          </t-tab-panel>
+          <t-tab-panel value="third" label="已上完课列表">
             <p>内容列表</p>
           </t-tab-panel>
         </t-tabs>
@@ -98,17 +117,19 @@ import { LineChart } from 'echarts/charts';
 import { GridComponent, LegendComponent, TooltipComponent } from 'echarts/components';
 import * as echarts from 'echarts/core';
 import { CanvasRenderer } from 'echarts/renderers';
-import { computed, nextTick, onMounted, onUnmounted, watch } from 'vue';
+import { computed, nextTick, onMounted, onUnmounted, reactive, watch } from 'vue';
 
+import { GetMangerInfo } from '@/api/manager';
+import { manager } from '@/api/model/manager';
 import ProductAIcon from '@/assets/assets-product-1.svg';
 import ProductBIcon from '@/assets/assets-product-2.svg';
 import ProductCIcon from '@/assets/assets-product-3.svg';
 import ProductDIcon from '@/assets/assets-product-4.svg';
 import { useSettingStore } from '@/store';
 import { changeChartsTheme } from '@/utils/color';
-import { LAST_7_DAYS } from '@/utils/date';
+import { LAST_30_DAYS } from '@/utils/date';
 
-import { PRODUCT_LIST, TEAM_MEMBERS, USER_INFO_LIST } from './constants';
+import { PRODUCT_LIST, TEAM_MEMBERS } from './constants';
 import { getFolderLineDataSet } from './index';
 
 echarts.use([GridComponent, TooltipComponent, LineChart, CanvasRenderer, LegendComponent]);
@@ -117,6 +138,23 @@ let lineContainer: HTMLElement;
 let lineChart: echarts.ECharts;
 const store = useSettingStore();
 const chartColors = computed(() => store.chartColors);
+const manageInfo = reactive<manager>({
+  workCode: '',
+  office: '',
+  department: '',
+  id: 0,
+  name: '',
+});
+const MangerInfo = () => {
+  console.log(manageInfo.workCode);
+  GetMangerInfo()
+    .then((result) => {
+      Object.assign(manageInfo, result);
+    })
+    .catch((err) => {
+      console.log('异常', err);
+    });
+};
 
 const onLineChange = (value) => {
   lineChart.setOption(getFolderLineDataSet(value));
@@ -144,6 +182,7 @@ const updateContainer = () => {
 };
 
 onMounted(() => {
+  MangerInfo();
   nextTick(() => {
     initChart();
   });
