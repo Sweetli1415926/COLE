@@ -1,43 +1,106 @@
 <template>
   <t-row :gutter="[16, 16]">
-    <t-col v-for="(item, index) in PANE_LIST" :key="item.title" :xs="6" :xl="3">
-      <t-card
-        :title="item.title"
-        :bordered="false"
-        :class="{ 'dashboard-item': true, 'dashboard-item--main-color': index == 0 }"
-      >
+    <t-col :xs="6" :xl="3">
+      <t-card title="总收入" :bordered="false" :class="{ 'dashboard-item': true, 'dashboard-item--main-color': true }">
         <div class="dashboard-item-top">
-          <span :style="{ fontSize: `${resizeTime * 28}px` }">{{ item.number }}</span>
+          <span :style="{ fontSize: `${resizeTime * 28}px` }">￥ {{ formatNumber(TotalIncome) }}</span>
         </div>
         <div class="dashboard-item-left">
           <div
-            v-if="index === 0"
             id="moneyContainer"
             class="dashboard-chart-container"
             :style="{ width: `${resizeTime * 120}px`, height: '100px', marginTop: '-24px' }"
           ></div>
-          <div
-            v-else-if="index === 1"
-            id="refundContainer"
-            class="dashboard-chart-container"
-            :style="{ width: `${resizeTime * 120}px`, height: '56px', marginTop: '-24px' }"
-          ></div>
-          <span v-else-if="index === 2" :style="{ marginTop: `-24px` }">
-            <usergroup-icon />
-          </span>
-          <span v-else :style="{ marginTop: '-24px' }">
-            <file-icon />
-          </span>
         </div>
         <template #footer>
           <div class="dashboard-item-bottom">
             <div class="dashboard-item-block">
-              自从上周以来
+              同比去年
               <trend
                 class="dashboard-item-trend"
-                :type="item.upTrend ? 'up' : 'down'"
-                :is-reverse-color="index === 0"
-                :describe="item.upTrend || item.downTrend"
+                :type="TotalIncomeUpOrDown.includes('-') ? 'down' : 'up'"
+                :is-reverse-color="true"
+                :describe="TotalIncomeUpOrDown"
+              />
+            </div>
+            <t-icon name="chevron-right" />
+          </div>
+        </template>
+      </t-card>
+    </t-col>
+    <t-col :xs="6" :xl="3">
+      <t-card title="总成本" :bordered="false" :class="{ 'dashboard-item': true }">
+        <div class="dashboard-item-top">
+          <span :style="{ fontSize: `${resizeTime * 28}px` }">￥ {{ formatNumber(TotalCost) }}</span>
+        </div>
+        <div class="dashboard-item-left">
+          <div
+            id="refundContainer"
+            class="dashboard-chart-container"
+            :style="{ width: `${resizeTime * 120}px`, height: '56px', marginTop: '-24px' }"
+          ></div>
+        </div>
+        <template #footer>
+          <div class="dashboard-item-bottom">
+            <div class="dashboard-item-block">
+              同比去年
+              <trend
+                class="dashboard-item-trend"
+                :type="TotalCostUpOrDown.includes('-') ? 'down' : 'up'"
+                :is-reverse-color="false"
+                :describe="TotalCostUpOrDown"
+              />
+            </div>
+            <t-icon name="chevron-right" />
+          </div>
+        </template>
+      </t-card>
+    </t-col>
+    <t-col :xs="6" :xl="3">
+      <t-card title="总课程数量" :bordered="false" :class="{ 'dashboard-item': true }">
+        <div class="dashboard-item-top">
+          <span :style="{ fontSize: `${resizeTime * 28}px` }">{{ Count }}</span>
+        </div>
+        <div class="dashboard-item-left">
+          <span :style="{ marginTop: '-24px' }">
+            <file-icon />
+          </span>
+        </div>
+
+        <template #footer>
+          <div class="dashboard-item-bottom">
+            <div class="dashboard-item-block">
+              同比去年
+              <trend
+                class="dashboard-item-trend"
+                :type="CountUpOrDown.includes('-') ? 'down' : 'up'"
+                :describe="CountUpOrDown"
+              />
+            </div>
+            <t-icon name="chevron-right" />
+          </div>
+        </template>
+      </t-card>
+    </t-col>
+    <t-col :xs="6" :xl="3">
+      <t-card title="学生数量" :bordered="false" :class="{ 'dashboard-item': true }">
+        <div class="dashboard-item-top">
+          <span :style="{ fontSize: `${resizeTime * 28}px` }">{{ StudentCount }}</span>
+        </div>
+        <div class="dashboard-item-left">
+          <span :style="{ marginTop: `-24px` }">
+            <usergroup-icon />
+          </span>
+        </div>
+
+        <template #footer>
+          <div class="dashboard-item-bottom">
+            <div class="dashboard-item-block">
+              同比去年
+              <trend
+                class="dashboard-item-trend"
+                :type="StudentCountUpOrDown.includes('-') ? 'down' : 'up'"
+                :describe="StudentCountUpOrDown"
               />
             </div>
             <t-icon name="chevron-right" />
@@ -55,100 +118,36 @@ export default {
 </script>
 
 <script setup lang="ts">
-import { BarChart, LineChart } from 'echarts/charts';
-import * as echarts from 'echarts/core';
-import { CanvasRenderer } from 'echarts/renderers';
+import { storeToRefs } from 'pinia';
 import { FileIcon, UsergroupIcon } from 'tdesign-icons-vue-next';
-import { nextTick, onMounted, onUnmounted, ref, watch } from 'vue';
+import { ref } from 'vue';
 
 // 导入样式
 import Trend from '@/components/trend/index.vue';
-import { useSettingStore } from '@/store';
-import { changeChartsTheme } from '@/utils/color';
+import { useManagerStore } from '@/store';
 
-import { PANE_LIST } from '../constants';
-import { constructInitDashboardDataset } from '../index';
+const formatNumber = (num: any) => {
+  if (num === undefined) {
+    return 0;
+  }
+  const parts = num.toFixed(2).toString().split('.');
+  parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 
-echarts.use([LineChart, BarChart, CanvasRenderer]);
+  return parts.join('.');
+};
 
-const store = useSettingStore();
+const managerStore = useManagerStore();
+const {
+  TotalIncome,
+  TotalIncomeUpOrDown,
+  TotalCost,
+  TotalCostUpOrDown,
+  Count,
+  CountUpOrDown,
+  StudentCount,
+  StudentCountUpOrDown,
+} = storeToRefs(managerStore);
 const resizeTime = ref(1);
-
-// moneyCharts
-let moneyContainer: HTMLElement;
-let moneyChart: echarts.ECharts;
-const renderMoneyChart = () => {
-  if (!moneyContainer) {
-    moneyContainer = document.getElementById('moneyContainer');
-  }
-  moneyChart = echarts.init(moneyContainer);
-  moneyChart.setOption(constructInitDashboardDataset('line'));
-};
-
-// refundCharts
-let refundContainer: HTMLElement;
-let refundChart: echarts.ECharts;
-const renderRefundChart = () => {
-  if (!refundContainer) {
-    refundContainer = document.getElementById('refundContainer');
-  }
-  refundChart = echarts.init(refundContainer);
-  refundChart.setOption(constructInitDashboardDataset('bar'));
-};
-
-const renderCharts = () => {
-  renderMoneyChart();
-  renderRefundChart();
-};
-
-// chartSize update
-const updateContainer = () => {
-  if (document.documentElement.clientWidth >= 1400 && document.documentElement.clientWidth < 1920) {
-    resizeTime.value = Number((document.documentElement.clientWidth / 2080).toFixed(2));
-  } else if (document.documentElement.clientWidth < 1080) {
-    resizeTime.value = Number((document.documentElement.clientWidth / 1080).toFixed(2));
-  } else {
-    resizeTime.value = 1;
-  }
-  moneyChart.resize({
-    width: resizeTime.value * 120,
-    // height: resizeTime.value * 100,
-  });
-  refundChart.resize({
-    width: resizeTime.value * 120,
-    // height: resizeTime.value * 56,
-  });
-};
-
-onMounted(() => {
-  renderCharts();
-  nextTick(() => {
-    updateContainer();
-  });
-  window.addEventListener('resize', updateContainer, false);
-});
-
-onUnmounted(() => {
-  window.removeEventListener('resize', updateContainer);
-});
-
-watch(
-  () => store.brandTheme,
-  () => {
-    changeChartsTheme([refundChart]);
-  },
-);
-
-watch(
-  () => store.mode,
-  () => {
-    [moneyChart, refundChart].forEach((item) => {
-      item.dispose();
-    });
-
-    renderCharts();
-  },
-);
 </script>
 
 <style lang="less" scoped>

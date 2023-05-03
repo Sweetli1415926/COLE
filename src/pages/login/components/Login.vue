@@ -9,7 +9,7 @@
   >
     <template v-if="type == 'password'">
       <t-form-item name="username">
-        <t-input v-model="formData.username" size="large" placeholder="请输入账号：admin">
+        <t-input v-model="formData.username" size="large" placeholder="请输入账号">
           <template #prefix-icon>
             <t-icon name="user" />
           </template>
@@ -22,7 +22,7 @@
           size="large"
           :type="showPsw ? 'text' : 'password'"
           clearable
-          placeholder="请输入登录密码：admin"
+          placeholder="请输入登录密码"
         >
           <template #prefix-icon>
             <t-icon name="lock-on" />
@@ -134,11 +134,14 @@ const onSubmit = async ({ validateResult }) => {
   if (validateResult === true) {
     try {
       console.log(formData.value);
-      await userStore.login(formData.value);
-      MessagePlugin.success('登陆成功');
-      const redirect = route.query.redirect as string;
-      const redirectUrl = redirect ? decodeURIComponent(redirect) : '/dashboard';
-      router.push(redirectUrl);
+      if (await userStore.login(formData.value)) {
+        MessagePlugin.success('登陆成功');
+        const redirect = route.query.redirect as string;
+        const redirectUrl = redirect ? decodeURIComponent(redirect) : '/dashboard';
+        router.push(redirectUrl);
+      } else {
+        MessagePlugin.warning('用户名或密码错误');
+      }
     } catch (e) {
       console.log(e);
       MessagePlugin.error(e.message);

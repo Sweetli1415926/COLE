@@ -4,22 +4,21 @@
       <!-- 简单步骤条 -->
       <t-card :bordered="false">
         <t-steps class="step-container" :current="1" status="process">
-          <t-step-item title="提交申请" content="已于12月21日提交" />
-          <t-step-item title="电子信息" content="预计1-3个工作日" />
-          <t-step-item title="发票已邮寄" content="电子发票开出后联系" />
-          <t-step-item title="完成申请" content="如有疑问联系客服" />
+          <t-step-item title="开设新的课程" content="已于4月21日提交" />
+          <t-step-item title="添加人员信息" content="将所有上课学院导入" />
+          <t-step-item title="添加课程、教师、教室信息" content="由教务办公室分配" />
+          <t-step-item title="添加物料信息" content="由综合办公室采购" />
+          <t-step-item title="开具相关票据" content="由财务办公室收费开票" />
         </t-steps>
       </t-card>
 
       <!-- 分步表单1 -->
       <div v-show="activeForm === 0" class="rule-tips">
-        <t-alert theme="info" title="发票开具规则：" :close="true">
+        <t-alert theme="info" title="业务分工细则：" :close="true">
           <template #message>
-            <p>
-              1、申请开票后，电子发票在1～3个工作日内开具；增值税专用发票（纸质）如资质审核通过，将在电子发票开具后10个工作日内为您寄出；
-            </p>
-            <p>2、开票金额为您实际支付金额；</p>
-            <p>3、如有疑问请直接联系：13300001111。</p>
+            <p>1、添加课程信息之后由教务办公室统一联系老师,安排课程并分配上课教室;</p>
+            <p>2、添加物料信息后由综合办公室统一采购,班主任或业务员签字领取</p>
+            <p>3、财务办公室将统一收费及开票工作,并上传相关票据</p>
           </template>
         </t-alert>
       </div>
@@ -31,12 +30,21 @@
         label-align="right"
         @submit="(result) => onSubmit(result, 1)"
       >
-        <t-form-item label="合同名称" name="name">
+        <t-form-item label="课程状态" name="name">
           <t-select v-model="formData1.name" :style="{ width: '480px' }" class="demo-select-base" clearable>
-            <t-option v-for="(item, index) in NAME_OPTIONS" :key="index" :value="item.value" :label="item.label">
+            <t-option v-for="(item, index) in courseState" :key="index" :value="item.value" :label="item.label">
               {{ item.label }}
             </t-option>
           </t-select>
+          <div style="margin-right: 100px"></div>
+          <t-input v-model="formData1.name" :clearable="true" :style="{ width: '480px' }" class="demo-select-base">
+          </t-input>
+        </t-form-item>
+        <t-form-item label="课程名称" name="name">
+          <t-input v-model="formData1.name" :clearable="true" :style="{ width: '480px' }" class="demo-select-base">
+          </t-input>
+          <div style="margin-right: 100px"></div>
+          <t-date-range-picker allow-input clearable />
         </t-form-item>
         <t-form-item label="发票类型" name="type">
           <t-select v-model="formData1.type" :style="{ width: '480px' }" class="demo-select-base" clearable>
@@ -153,11 +161,11 @@ import { useRouter } from 'vue-router';
 
 import {
   ADDRESS_OPTIONS,
+  courseState,
   FORM_RULES,
   INITIAL_DATA1,
   INITIAL_DATA2,
   INITIAL_DATA3,
-  NAME_OPTIONS,
   TYPE_OPTIONS,
 } from './constants';
 

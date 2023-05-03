@@ -3,7 +3,7 @@
     <t-col :flex="3">
       <div class="user-left-greeting">
         <div>
-          Hi，{{ manageInfo.name }}
+          Hi，{{ managerInfo.name }}
           <span class="regular"> 下午好，今天是你加终生教育学院的第705天～</span>
         </div>
         <img src="@/assets/assets-tencent-logo.png" class="logo" />
@@ -18,27 +18,27 @@
         <t-row class="content" justify="space-between">
           <t-col class="contract" :span="4">
             <div class="contract-title">工资号</div>
-            <div class="contract-detail">{{ manageInfo.workCode }}</div>
+            <div class="contract-detail">{{ managerInfo.workCode }}</div>
           </t-col>
           <t-col class="contract" :span="4">
             <div class="contract-title">手机</div>
-            <div class="contract-detail">{{ manageInfo.phoneNumber }}</div>
+            <div class="contract-detail">{{ managerInfo.phoneNumber }}</div>
           </t-col>
           <t-col class="contract" :span="4">
             <div class="contract-title">座机</div>
-            <div class="contract-detail">{{ manageInfo.telNumber }}</div>
+            <div class="contract-detail">{{ managerInfo.telNumber }}</div>
           </t-col>
           <t-col class="contract" :span="4">
             <div class="contract-title">邮箱</div>
-            <div class="contract-detail">{{ manageInfo.email }}</div>
+            <div class="contract-detail">{{ managerInfo.email }}</div>
           </t-col>
           <t-col class="contract" :span="4">
             <div class="contract-title">所属部门</div>
-            <div class="contract-detail">{{ manageInfo.department }}</div>
+            <div class="contract-detail">{{ managerInfo.department }}</div>
           </t-col>
           <t-col class="contract" :span="4">
             <div class="contract-title">办公室</div>
-            <div class="contract-detail">{{ manageInfo.office }}</div>
+            <div class="contract-detail">{{ managerInfo.office }}</div>
           </t-col>
         </t-row>
       </t-card>
@@ -117,15 +117,14 @@ import { LineChart } from 'echarts/charts';
 import { GridComponent, LegendComponent, TooltipComponent } from 'echarts/components';
 import * as echarts from 'echarts/core';
 import { CanvasRenderer } from 'echarts/renderers';
-import { computed, nextTick, onMounted, onUnmounted, reactive, watch } from 'vue';
+import { storeToRefs } from 'pinia';
+import { computed, nextTick, onMounted, onUnmounted, watch } from 'vue';
 
-import { GetMangerInfo } from '@/api/manager';
-import { manager } from '@/api/model/manager';
 import ProductAIcon from '@/assets/assets-product-1.svg';
 import ProductBIcon from '@/assets/assets-product-2.svg';
 import ProductCIcon from '@/assets/assets-product-3.svg';
 import ProductDIcon from '@/assets/assets-product-4.svg';
-import { useSettingStore } from '@/store';
+import { useManagerStore, useSettingStore } from '@/store';
 import { changeChartsTheme } from '@/utils/color';
 import { LAST_30_DAYS } from '@/utils/date';
 
@@ -138,24 +137,6 @@ let lineContainer: HTMLElement;
 let lineChart: echarts.ECharts;
 const store = useSettingStore();
 const chartColors = computed(() => store.chartColors);
-const manageInfo = reactive<manager>({
-  workCode: '',
-  office: '',
-  department: '',
-  id: 0,
-  name: '',
-});
-const MangerInfo = () => {
-  console.log(manageInfo.workCode);
-  GetMangerInfo()
-    .then((result) => {
-      Object.assign(manageInfo, result);
-    })
-    .catch((err) => {
-      console.log('异常', err);
-    });
-};
-
 const onLineChange = (value) => {
   lineChart.setOption(getFolderLineDataSet(value));
 };
@@ -180,9 +161,11 @@ const updateContainer = () => {
     height: lineContainer.clientHeight,
   });
 };
+const managerStore = useManagerStore();
+const { managerInfo } = storeToRefs(managerStore);
 
 onMounted(() => {
-  MangerInfo();
+  managerStore.GetMangerInfo();
   nextTick(() => {
     initChart();
   });

@@ -5,6 +5,7 @@ import { student } from './student';
 
 export interface course {
   id: number;
+  totalIncome: number;
   name: string;
   students: student[];
   materials: material[];
@@ -12,4 +13,5 @@ export interface course {
   company: company;
   startTime: Date;
   endTime: Date;
+  state: String;
 }

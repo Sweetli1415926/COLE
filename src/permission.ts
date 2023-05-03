@@ -5,7 +5,7 @@ import { MessagePlugin } from 'tdesign-vue-next';
 import { RouteRecordRaw } from 'vue-router';
 
 import router from '@/router';
-import { getPermissionStore, getUserStore } from '@/store';
+import { getPermissionStore, useUserStore } from '@/store';
 import { PAGE_NOT_FOUND_ROUTE } from '@/utils/route/constant';
 
 NProgress.configure({ showSpinner: false });
@@ -16,7 +16,7 @@ router.beforeEach(async (to, from, next) => {
   const permissionStore = getPermissionStore();
   const { whiteListRouters } = permissionStore;
 
-  const userStore = getUserStore();
+  const userStore = useUserStore();
   const { token } = userStore;
   if (token) {
     if (to.path === '/login') {
@@ -43,8 +43,6 @@ router.beforeEach(async (to, from, next) => {
     }
 
     try {
-      await userStore.getUserInfo();
-
       if (router.hasRoute(to.name)) {
         next();
       } else {
@@ -74,7 +72,7 @@ router.beforeEach(async (to, from, next) => {
 
 router.afterEach((to) => {
   if (to.path === '/login') {
-    const userStore = getUserStore();
+    const userStore = useUserStore();
     const permissionStore = getPermissionStore();
 
     userStore.logout();

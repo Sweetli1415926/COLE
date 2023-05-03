@@ -11,10 +11,11 @@ export const FORM_RULES: Record<string, FormRule[]> = {
   fullAddress: [{ required: true, message: '请输入详细地址', type: 'error' }],
 };
 
-export const NAME_OPTIONS = [
-  { label: '合同A', value: '1' },
-  { label: '合同B', value: '2' },
-  { label: '合同C', value: '3' },
+export const courseState = [
+  { label: '意向课程', value: '1' },
+  { label: '预定课程', value: '2' },
+  { label: '上课中', value: '3' },
+  { label: '已完成', value: '4' },
 ];
 
 export const TYPE_OPTIONS = [
