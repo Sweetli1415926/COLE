@@ -1,7 +1,7 @@
 /* eslint-disable simple-import-sort/imports */
 import TDesign from 'tdesign-vue-next';
 import { createApp } from 'vue';
-
+import 'default-passive-events';
 import App from './App.vue';
 import router from './router';
 import { store } from './store';

@@ -1,6 +1,6 @@
 <template>
   <header class="login-header">
-    <logo-full-icon class="logo" />
+    <!-- <img src="../logo.jpeg" /> -->
     <div class="operations-container">
       <t-button theme="default" shape="square" variant="text" @click="navToGitHub">
         <t-icon name="logo-github" class="icon" />
@@ -16,7 +16,7 @@
 </template>
 
 <script setup lang="ts">
-import LogoFullIcon from '@/assets/assets-logo-full.svg?component';
+// import LogoFullIcon from '@/assets/assets-logo-full.svg?component';
 import { useSettingStore } from '@/store';
 
 const settingStore = useSettingStore();
@@ -41,7 +41,7 @@ const navToHelper = () => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  backdrop-filter: blur(10px);
+  // backdrop-filter: blur(10px);
   color: var(--td-text-color-primary);
   height: var(--td-comp-size-xxxl);
 
@@ -53,6 +53,8 @@ const navToHelper = () => {
   .operations-container {
     display: flex;
     align-items: center;
+    flex: 1;
+    justify-content: flex-end;
     .t-button {
       margin-left: var(--td-comp-margin-l);
     }

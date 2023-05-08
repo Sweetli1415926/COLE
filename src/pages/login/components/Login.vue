@@ -34,7 +34,7 @@
       </t-form-item>
 
       <div class="check-container remember-pwd">
-        <t-checkbox>记住账号</t-checkbox>
+        <t-checkbox style="color: #fff">记住账号</t-checkbox>
         <span class="tip">忘记密码？</span>
       </div>
     </template>

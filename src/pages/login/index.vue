@@ -4,8 +4,8 @@
 
     <div class="login-container">
       <div class="title-container">
-        <h1 class="title margin-no">登录到</h1>
-        <h1 class="title">终身学院OA管理系统</h1>
+        <img src="./login-logo.png" />
+        <span class="title">登录到终身学院OA管理系统</span>
       </div>
 
       <login v-if="type === 'login'" />

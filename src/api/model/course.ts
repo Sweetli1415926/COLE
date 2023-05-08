@@ -13,5 +13,6 @@ export interface course {
   company: company;
   startTime: Date;
   endTime: Date;
-  state: String;
+  state: string;
+  payType: string;
 }

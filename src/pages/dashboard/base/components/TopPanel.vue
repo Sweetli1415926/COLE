@@ -3,7 +3,7 @@
     <t-col :xs="6" :xl="3">
       <t-card title="总收入" :bordered="false" :class="{ 'dashboard-item': true, 'dashboard-item--main-color': true }">
         <div class="dashboard-item-top">
-          <span :style="{ fontSize: `${resizeTime * 28}px` }">￥ {{ formatNumber(TotalIncome) }}</span>
+          <span :style="{ fontSize: `${resizeTime * 28}px` }">¥ {{ formatNumber(TotalIncome) }}</span>
         </div>
         <div class="dashboard-item-left">
           <div
@@ -18,7 +18,7 @@
               同比去年
               <trend
                 class="dashboard-item-trend"
-                :type="TotalIncomeUpOrDown.includes('-') ? 'down' : 'up'"
+                :type="TotalIncomeUpOrDown ? 'down' : 'up'"
                 :is-reverse-color="true"
                 :describe="TotalIncomeUpOrDown"
               />
@@ -31,7 +31,7 @@
     <t-col :xs="6" :xl="3">
       <t-card title="总成本" :bordered="false" :class="{ 'dashboard-item': true }">
         <div class="dashboard-item-top">
-          <span :style="{ fontSize: `${resizeTime * 28}px` }">￥ {{ formatNumber(TotalCost) }}</span>
+          <span :style="{ fontSize: `${resizeTime * 28}px` }">¥ {{ formatNumber(TotalCost) }}</span>
         </div>
         <div class="dashboard-item-left">
           <div
@@ -43,10 +43,10 @@
         <template #footer>
           <div class="dashboard-item-bottom">
             <div class="dashboard-item-block">
-              同比去年
+              自从上周以来
               <trend
                 class="dashboard-item-trend"
-                :type="TotalCostUpOrDown.includes('-') ? 'down' : 'up'"
+                :type="TotalCostUpOrDown ? 'down' : 'up'"
                 :is-reverse-color="false"
                 :describe="TotalCostUpOrDown"
               />
@@ -92,7 +92,6 @@
             <usergroup-icon />
           </span>
         </div>
-
         <template #footer>
           <div class="dashboard-item-bottom">
             <div class="dashboard-item-block">
@@ -118,14 +117,21 @@ export default {
 </script>
 
 <script setup lang="ts">
+import { BarChart, LineChart } from 'echarts/charts';
+import * as echarts from 'echarts/core';
+import { CanvasRenderer } from 'echarts/renderers';
 import { storeToRefs } from 'pinia';
 import { FileIcon, UsergroupIcon } from 'tdesign-icons-vue-next';
-import { ref } from 'vue';
+import { nextTick, onMounted, onUnmounted, ref, watch } from 'vue';
 
 // 导入样式
 import Trend from '@/components/trend/index.vue';
-import { useManagerStore } from '@/store';
+import { useManagerStore, useSettingStore } from '@/store';
+import { changeChartsTheme } from '@/utils/color';
 
+import { constructInitDashboardDataset } from '../index';
+
+echarts.use([LineChart, BarChart, CanvasRenderer]);
 const formatNumber = (num: any) => {
   if (num === undefined) {
     return 0;
@@ -147,7 +153,84 @@ const {
   StudentCount,
   StudentCountUpOrDown,
 } = storeToRefs(managerStore);
+const store = useSettingStore();
 const resizeTime = ref(1);
+
+// moneyCharts
+let moneyContainer: HTMLElement;
+let moneyChart: echarts.ECharts;
+const renderMoneyChart = () => {
+  if (!moneyContainer) {
+    moneyContainer = document.getElementById('moneyContainer');
+  }
+  moneyChart = echarts.init(moneyContainer);
+  moneyChart.setOption(constructInitDashboardDataset('line'));
+};
+
+// refundCharts
+let refundContainer: HTMLElement;
+let refundChart: echarts.ECharts;
+const renderRefundChart = () => {
+  if (!refundContainer) {
+    refundContainer = document.getElementById('refundContainer');
+  }
+  refundChart = echarts.init(refundContainer);
+  refundChart.setOption(constructInitDashboardDataset('bar'));
+};
+
+const renderCharts = () => {
+  renderMoneyChart();
+  renderRefundChart();
+};
+
+// chartSize update
+const updateContainer = () => {
+  if (document.documentElement.clientWidth >= 1400 && document.documentElement.clientWidth < 1920) {
+    resizeTime.value = Number((document.documentElement.clientWidth / 2080).toFixed(2));
+  } else if (document.documentElement.clientWidth < 1080) {
+    resizeTime.value = Number((document.documentElement.clientWidth / 1080).toFixed(2));
+  } else {
+    resizeTime.value = 1;
+  }
+  moneyChart.resize({
+    width: resizeTime.value * 120,
+    // height: resizeTime.value * 100,
+  });
+  refundChart.resize({
+    width: resizeTime.value * 120,
+    // height: resizeTime.value * 56,
+  });
+};
+
+onMounted(() => {
+  renderCharts();
+  nextTick(() => {
+    updateContainer();
+  });
+  window.addEventListener('resize', updateContainer, false);
+});
+
+onUnmounted(() => {
+  window.removeEventListener('resize', updateContainer);
+});
+
+watch(
+  () => store.brandTheme,
+  () => {
+    changeChartsTheme([refundChart]);
+  },
+);
+
+watch(
+  () => store.mode,
+  () => {
+    [moneyChart, refundChart].forEach((item) => {
+      item.dispose();
+    });
+
+    renderCharts();
+  },
+);
 </script>
 
 <style lang="less" scoped>

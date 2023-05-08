@@ -1,22 +1,22 @@
 <template>
   <div>
+    <button @click="consolog">test</button>
     <div class="form-step-container">
       <!-- 简单步骤条 -->
       <t-card :bordered="false">
         <t-steps class="step-container" :current="1" status="process">
-          <t-step-item title="开设新的课程" content="已于4月21日提交" />
+          <t-step-item title="开设新的培训班" content="已于4月21日提交" />
           <t-step-item title="添加人员信息" content="将所有上课学院导入" />
           <t-step-item title="添加课程、教师、教室信息" content="由教务办公室分配" />
           <t-step-item title="添加物料信息" content="由综合办公室采购" />
           <t-step-item title="开具相关票据" content="由财务办公室收费开票" />
         </t-steps>
       </t-card>
-
       <!-- 分步表单1 -->
       <div v-show="activeForm === 0" class="rule-tips">
         <t-alert theme="info" title="业务分工细则：" :close="true">
           <template #message>
-            <p>1、添加课程信息之后由教务办公室统一联系老师,安排课程并分配上课教室;</p>
+            <p>1、添加培训班信息之后由教务办公室统一联系老师,安排课程并分配上课教室;</p>
             <p>2、添加物料信息后由综合办公室统一采购,班主任或业务员签字领取</p>
             <p>3、财务办公室将统一收费及开票工作,并上传相关票据</p>
           </template>
@@ -25,35 +25,70 @@
       <t-form
         v-show="activeForm === 0"
         class="step-form"
-        :data="formData1"
-        :rules="FORM_RULES"
+        :data="formAddNewCourse"
+        :rules="addNewCourseRules"
         label-align="right"
         @submit="(result) => onSubmit(result, 1)"
       >
-        <t-form-item label="课程状态" name="name">
-          <t-select v-model="formData1.name" :style="{ width: '480px' }" class="demo-select-base" clearable>
-            <t-option v-for="(item, index) in courseState" :key="index" :value="item.value" :label="item.label">
-              {{ item.label }}
-            </t-option>
-          </t-select>
-          <div style="margin-right: 100px"></div>
-          <t-input v-model="formData1.name" :clearable="true" :style="{ width: '480px' }" class="demo-select-base">
-          </t-input>
-        </t-form-item>
-        <t-form-item label="课程名称" name="name">
-          <t-input v-model="formData1.name" :clearable="true" :style="{ width: '480px' }" class="demo-select-base">
-          </t-input>
-          <div style="margin-right: 100px"></div>
-          <t-date-range-picker allow-input clearable />
-        </t-form-item>
-        <t-form-item label="发票类型" name="type">
-          <t-select v-model="formData1.type" :style="{ width: '480px' }" class="demo-select-base" clearable>
-            <t-option v-for="(item, index) in TYPE_OPTIONS" :key="index" :value="item.value" :label="item.label">
-              {{ item.label }}
-            </t-option>
-          </t-select>
-        </t-form-item>
-        <t-form-item label="开票金额"> {{ amount }} 元 </t-form-item>
+        <t-space>
+          <t-form-item label="培训班状态" name="state">
+            <t-select v-model="formAddNewCourse.state" :style="{ width: '200px' }" class="demo-select-base" clearable>
+              <t-option v-for="(item, index) in courseState" :key="index" :value="item.value" :label="item.label">
+                {{ item.label }}
+              </t-option>
+            </t-select>
+          </t-form-item>
+          <div style="margin-right: 85px"></div>
+          <t-form-item label="培训班名称" name="name">
+            <t-input v-model="formAddNewCourse.name" clearable :style="{ width: '300px' }"> </t-input>
+          </t-form-item>
+        </t-space>
+        <div style="margin-bottom: 20px"></div>
+
+        <t-space>
+          <t-form-item label="培训时间" name="dateTimeSpan"
+            ><t-date-range-picker v-model="DateTimeSpan" :style="{ width: '300px' }" clearable allow-input
+          /></t-form-item>
+          <t-form-item v-model="formAddNewCourse.company.name" label="对方单位名称" name="companyname">
+            <t-input clearable :style="{ width: '300px' }"> </t-input>
+          </t-form-item>
+        </t-space>
+        <div style="margin-bottom: 20px"></div>
+        <t-space>
+          <t-form-item label="缴费方式" name="payType">
+            <t-select v-model="formAddNewCourse.payType" :style="{ width: '200px' }" class="demo-select-base" clearable>
+              <t-option v-for="(item, index) in payType" :key="index" :value="item.value" :label="item.label">
+                {{ item.label }}
+              </t-option>
+            </t-select>
+          </t-form-item>
+          <t-form-item label="培训人数" name="PeronCount">
+            <t-input-number v-model="personCount" theme="normal" :style="{ width: '60px' }" />
+          </t-form-item>
+          <div v-if="formAddNewCourse.payType === '每人每天付费'">
+            <t-form-item label="每人每天收费" name="perDayPerPersonFee">
+              <t-input-number v-model="perDayPerPersonFee" theme="normal" :style="{ width: '100px' }" />
+            </t-form-item>
+          </div>
+          <div v-if="formAddNewCourse.payType === '整班按天付费'">
+            <t-form-item label="每班每天收费" name="perDayPerPersonFee">
+              <t-input-number v-model="perDayPerPersonFee" theme="normal" :style="{ width: '100px' }" />
+            </t-form-item>
+          </div>
+        </t-space>
+        <div style="margin-bottom: 20px"></div>
+        <t-space>
+          <t-form-item label="培训天数" name="traningDay">
+            <t-input-number v-model="traningDay" theme="normal" :style="{ width: '60px' }" />
+          </t-form-item>
+          <t-form-item label="付费天数" name="payDay">
+            <t-input-number v-model="payDay" theme="normal" :style="{ width: '60px' }" />
+          </t-form-item>
+          <t-form-item label="合计收费金额" name="TotalIncome">
+            <t-input-number v-model="formAddNewCourse.totalIncome" theme="normal" :style="{ width: '110px' }" />
+          </t-form-item>
+        </t-space>
+        <div style="margin-bottom: 20px"></div>
         <t-form-item>
           <t-button theme="primary" type="submit"> 提交申请 </t-button>
         </t-form-item>
@@ -64,7 +99,7 @@
         v-show="activeForm === 1"
         class="step-form"
         :data="formData2"
-        :rules="FORM_RULES"
+        :rules="addNewCourseRules"
         label-align="left"
         @reset="onReset(0)"
         @submit="(result) => onSubmit(result, 2)"
@@ -101,7 +136,7 @@
         v-show="activeForm === 2"
         class="step-form"
         :data="formData3"
-        :rules="FORM_RULES"
+        :rules="addNewCourseRules"
         label-align="left"
         @reset="onReset(1)"
         @submit="(result) => onSubmit(result, 6)"
@@ -155,42 +190,41 @@ export default {
 </script>
 
 <script setup lang="ts">
-import { Data, SubmitContext } from 'tdesign-vue-next';
-import { computed, ref } from 'vue';
+import { Data, DateRangeValue, SubmitContext } from 'tdesign-vue-next';
+import { ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 
 import {
+  addNewCourseRules,
   ADDRESS_OPTIONS,
   courseState,
-  FORM_RULES,
-  INITIAL_DATA1,
+  formcourse,
   INITIAL_DATA2,
   INITIAL_DATA3,
-  TYPE_OPTIONS,
+  payType,
 } from './constants';
 
-const formData1 = ref({ ...INITIAL_DATA1 });
+const formAddNewCourse = ref({ ...formcourse });
 const formData2 = ref({ ...INITIAL_DATA2 });
 const formData3 = ref({ ...INITIAL_DATA3 });
 const activeForm = ref(0);
-
-const amount = computed(() => {
-  if (formData1.value.name === '1') {
-    return '565421';
-  }
-  if (formData1.value.name === '2') {
-    return '278821';
-  }
-  if (formData1.value.name === '3') {
-    return '109824';
-  }
-  return '--';
-});
-
+// 不提交表单的数据
+const perDayPerPersonFee = ref('');
+const personCount = ref('');
+const payDay = ref('');
+const traningDay = ref('');
+// 把DateSpan转换为两个日期
+const DateTimeSpan = ref([] as DateRangeValue);
 const onSubmit = (result: SubmitContext<Data>, val: number) => {
   if (result.validateResult === true) {
     activeForm.value = val;
   }
+};
+const consolog = () => {
+  console.log(formAddNewCourse.value.payType);
+};
+const watchtime = () => {
+  console.log(DateTimeSpan);
 };
 const onReset = (val: number) => {
   activeForm.value = val;
@@ -199,6 +233,15 @@ const complete = () => {
   const router = useRouter();
   router.replace({ path: '/detail/advanced' });
 };
+
+watch(
+  DateTimeSpan,
+  (newValue) => {
+    formAddNewCourse.value.startTime = new Date(newValue[0]);
+    formAddNewCourse.value.endTime = new Date(newValue[1]);
+  },
+  { deep: true },
+);
 </script>
 
 <style lang="less" scoped>
