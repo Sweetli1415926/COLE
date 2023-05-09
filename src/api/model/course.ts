@@ -15,4 +15,7 @@ export interface course {
   endTime: Date;
   state: string;
   payType: string;
+  isCompanyPayTeacherCost: boolean;
+  isCompanyPayHote: boolean;
+  notes: string;
 }

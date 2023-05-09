@@ -4,7 +4,7 @@
     <div class="form-step-container">
       <!-- 简单步骤条 -->
       <t-card :bordered="false">
-        <t-steps class="step-container" :current="1" status="process">
+        <t-steps class="step-container" :current="activeForm" status="process">
           <t-step-item title="开设新的培训班" content="已于4月21日提交" />
           <t-step-item title="添加人员信息" content="将所有上课学院导入" />
           <t-step-item title="添加课程、教师、教室信息" content="由教务办公室分配" />
@@ -77,20 +77,57 @@
           </div>
         </t-space>
         <div style="margin-bottom: 20px"></div>
-        <t-space>
-          <t-form-item label="培训天数" name="traningDay">
-            <t-input-number v-model="traningDay" theme="normal" :style="{ width: '60px' }" />
-          </t-form-item>
-          <t-form-item label="付费天数" name="payDay">
-            <t-input-number v-model="payDay" theme="normal" :style="{ width: '60px' }" />
-          </t-form-item>
-          <t-form-item label="合计收费金额" name="TotalIncome">
-            <t-input-number v-model="formAddNewCourse.totalIncome" theme="normal" :style="{ width: '110px' }" />
-          </t-form-item>
-        </t-space>
+        <t-collapse>
+          <t-collapse-panel header="具体开班信息" :borderless="true">
+            <t-space>
+              <t-form-item label="是否承担师资费" name="isCompanyPayTeacherCost">
+                <t-select
+                  v-model="formAddNewCourse.isCompanyPayTeacherCost"
+                  :style="{ width: '200px' }"
+                  class="demo-select-base"
+                  clearable
+                >
+                  <t-option value="true" label="是"> 是 </t-option>
+                  <t-option value="false" label="否"> 否 </t-option>
+                </t-select>
+              </t-form-item>
+              <t-form-item label="是否承担住宿费" name="isCompanyPayHote">
+                <t-select
+                  v-model="formAddNewCourse.isCompanyPayHote"
+                  :style="{ width: '200px' }"
+                  class="demo-select-base"
+                  clearable
+                >
+                  <t-option value="true" label="是"> 是 </t-option>
+                  <t-option value="false" label="否"> 否 </t-option>
+                </t-select>
+              </t-form-item>
+            </t-space>
+            <div style="margin-bottom: 20px"></div>
+            <t-space>
+              <t-form-item label="培训天数" name="traningDay">
+                <t-input-number v-model="traningDay" theme="normal" :style="{ width: '60px' }" />
+              </t-form-item>
+              <t-form-item label="付费天数" name="payDay">
+                <t-input-number v-model="payDay" theme="normal" :style="{ width: '60px' }" /> </t-form-item
+              ><t-form-item label="合计收费金额" name="TotalIncome">
+                <t-input-number v-model="formAddNewCourse.totalIncome" theme="normal" :style="{ width: '110px' }" />
+              </t-form-item>
+            </t-space>
+            <div style="margin-bottom: 20px"></div>
+            <t-space> </t-space>
+            <t-space>
+              <t-form-item label="需备注的内容" name="notes">
+                <t-textarea :style="{ width: '600px' }" />
+              </t-form-item>
+            </t-space>
+          </t-collapse-panel>
+        </t-collapse>
+
         <div style="margin-bottom: 20px"></div>
         <t-form-item>
-          <t-button theme="primary" type="submit"> 提交申请 </t-button>
+          <div style="margin-right: 500px"></div>
+          <t-button theme="primary" type="submit" size="large"> 创建培训班级 </t-button>
         </t-form-item>
       </t-form>
 
@@ -223,9 +260,9 @@ const onSubmit = (result: SubmitContext<Data>, val: number) => {
 const consolog = () => {
   console.log(formAddNewCourse.value.payType);
 };
-const watchtime = () => {
-  console.log(DateTimeSpan);
-};
+// const watchtime = () => {
+//   console.log(DateTimeSpan);
+// };
 const onReset = (val: number) => {
   activeForm.value = val;
 };
